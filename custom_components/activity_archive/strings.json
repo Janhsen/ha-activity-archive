@@ -1,0 +1,242 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Activity Archive",
+        "description": "Activities are written into the Home Assistant recorder with their real time stamps. Choose the folder where you put activity files (FIT, GPX, TCX) and how detailed the curves should be.",
+        "data": {
+          "import_dir": "Import folder",
+          "profile": "Detail level"
+        },
+        "data_description": {
+          "import_dir": "Absolute path below your configuration folder (or an allowed external folder). It is created if it does not exist.",
+          "profile": "Precise keeps the most points and needs the most database space; Standard and Coarse thin the curves out. Applies to new imports only."
+        }
+      },
+      "person": {
+        "title": "First person",
+        "description": "Every person gets their own entities named sensor.activity_archive_<short name>.",
+        "data": {
+          "name": "Display name",
+          "slug": "Short name for entity ids",
+          "athlete_name": "Strava athlete name (optional)"
+        },
+        "data_description": {
+          "slug": "Lower case letters, digits and underscores. Leave empty to derive it from the display name. It can not be changed later.",
+          "athlete_name": "Used to assign Strava export files to this person."
+        }
+      }
+    },
+    "error": {
+      "path_not_absolute": "The path must be absolute.",
+      "path_not_allowed": "The folder must be inside the configuration folder or listed in allowlist_external_dirs.",
+      "name_required": "Enter a display name.",
+      "invalid_slug": "The short name may only contain lower case letters, digits and underscores (at most 24 characters).",
+      "slug_reserved": "This short name collides with a curve name (for example heart_rate, speed or test). Choose another one.",
+      "slug_exists": "A person with this short name exists already."
+    },
+    "abort": {
+      "single_instance_allowed": "Activity Archive is already set up.",
+      "already_configured": "Activity Archive is already set up."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Activity Archive",
+        "menu_options": {
+          "settings": "Folder and detail level",
+          "add_person": "Add a person",
+          "edit_person": "Edit a person",
+          "remove_person": "Remove a person"
+        }
+      },
+      "settings": {
+        "title": "Folder and detail level",
+        "data": {
+          "import_dir": "Import folder",
+          "profile": "Detail level"
+        },
+        "data_description": {
+          "profile": "Applies to new imports only; states already written are never changed."
+        }
+      },
+      "add_person": {
+        "title": "Add a person",
+        "data": {
+          "name": "Display name",
+          "slug": "Short name for entity ids",
+          "athlete_name": "Strava athlete name (optional)"
+        },
+        "data_description": {
+          "slug": "Lower case letters, digits and underscores. Leave empty to derive it from the display name. It can not be changed later."
+        }
+      },
+      "edit_person": {
+        "title": "Edit a person",
+        "data": {
+          "person": "Person"
+        }
+      },
+      "edit_person_details": {
+        "title": "Edit a person",
+        "description": "The short name (entity ids) can not be changed.",
+        "data": {
+          "name": "Display name",
+          "athlete_name": "Strava athlete name (optional)"
+        }
+      },
+      "remove_person": {
+        "title": "Remove a person",
+        "description": "Only the setting is removed. States already written to the recorder and the ledger entries stay.",
+        "data": {
+          "person": "Person"
+        }
+      }
+    },
+    "error": {
+      "path_not_absolute": "The path must be absolute.",
+      "path_not_allowed": "The folder must be inside the configuration folder or listed in allowlist_external_dirs.",
+      "name_required": "Enter a display name.",
+      "invalid_slug": "The short name may only contain lower case letters, digits and underscores (at most 24 characters).",
+      "slug_reserved": "This short name collides with a curve name (for example heart_rate, speed or test). Choose another one.",
+      "slug_exists": "A person with this short name exists already.",
+      "last_person": "At least one person has to remain."
+    }
+  },
+  "selector": {
+    "profile": {
+      "options": {
+        "precise": "Precise (default)",
+        "standard": "Standard",
+        "coarse": "Coarse"
+      }
+    }
+  },
+  "issues": {
+    "retention_too_short": {
+      "title": "Recorder deletes history too early for the archive",
+      "description": "The recorder keeps only {keep_days} days (purge_keep_days), but archived activities are much older. Without a longer retention the next purge removes them. Set `purge_keep_days` to at least {needed} or switch off `auto_purge` in the recorder configuration. Activity Archive does not write while this issue exists."
+    },
+    "not_recorded": {
+      "title": "The recorder does not record the archive entities",
+      "description": "{count} archive entities are excluded by the recorder filter (for example {entities}). States written for them would be dropped. Add this to your recorder configuration and restart Home Assistant:\n\n```yaml\nrecorder:\n  include:\n    entity_globs:\n      - sensor.activity_archive_*\n      - device_tracker.activity_archive_*\n```"
+    },
+    "database_backend": {
+      "title": "Large imports are untested on {backend}",
+      "description": "Activity Archive was designed and measured on PostgreSQL. On {backend} a full import takes longer and the database file grows. Back up first and import in small steps. This is only a hint."
+    },
+    "low_disk_space": {
+      "title": "Little free disk space for the archive",
+      "description": "{free_gb} GB are free on the configuration volume. A large archive can add 1 to 2 GB to the recorder database, plus backups. Free up at least {needed_gb} GB before a big import. This is only a hint."
+    },
+    "recorder_not_recording": {
+      "title": "The recorder is not recording",
+      "description": "The recorder reports that it stopped recording (for example after a full queue or a database error). Activity Archive does not write while this is the case. Check the Home Assistant log and restart Home Assistant."
+    },
+    "ledger_unreadable": {
+      "title": "The import ledger has an unknown format",
+      "description": "The file .storage/activity_archive.ledger has version {version}, which this release can not read. It is left untouched so that no activity is imported twice. Update Activity Archive or restore the file from a backup."
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "Activity Archive is not set up or still loading."
+    },
+    "no_person": {
+      "message": "No person is configured. Add one in the integration options."
+    },
+    "person_required": {
+      "message": "Several people are configured. Say which one with the person field."
+    },
+    "person_unknown": {
+      "message": "This person is not configured."
+    },
+    "run_in_progress": {
+      "message": "Another import, rollback or test is running. Try again when it has finished."
+    },
+    "import_dir_not_allowed": {
+      "message": "The import folder is not inside the configuration folder or allowlist_external_dirs."
+    },
+    "import_dir_missing": {
+      "message": "The import folder does not exist."
+    },
+    "file_outside_import_dir": {
+      "message": "The file must be inside the import folder."
+    },
+    "file_not_found": {
+      "message": "The file was not found in the import folder."
+    },
+    "file_type_not_supported": {
+      "message": "Only .fit, .gpx, .tcx and .gz files are supported."
+    },
+    "file_unreadable": {
+      "message": "The file could not be read: {error}"
+    },
+    "ledger_unreadable": {
+      "message": "The import ledger has version {version}, which this release can not read. See Repairs."
+    },
+    "run_unknown": {
+      "message": "There is no run with the id {run_id}."
+    },
+    "test_write_failed": {
+      "message": "The test state could not be handed to the recorder: {error}"
+    }
+  },
+  "services": {
+    "import_file": {
+      "name": "Import file",
+      "description": "Reads one FIT, GPX or TCX file from the import folder and writes it into the recorder. With dry run on (default) it only reads and counts.",
+      "fields": {
+        "file": {
+          "name": "File",
+          "description": "File name inside the import folder."
+        },
+        "person": {
+          "name": "Person",
+          "description": "Short name of the person. Optional if only one person is configured."
+        },
+        "dry_run": {
+          "name": "Dry run",
+          "description": "Only read and count, write nothing. Switch off to write; written states can not be edited afterwards."
+        }
+      }
+    },
+    "verify": {
+      "name": "Verify",
+      "description": "Checks the ledger against the recorder: are all states of completed imports still there?",
+      "fields": {
+        "run_id": {
+          "name": "Run",
+          "description": "Check only this run. Leave empty for all."
+        }
+      }
+    },
+    "rollback": {
+      "name": "Roll back run",
+      "description": "Takes an import run back: its activities are marked as deleted so they are not imported again. States stay in the recorder unless you also purge entities.",
+      "fields": {
+        "run_id": {
+          "name": "Run",
+          "description": "Id of the run (see the result of verify or import_file)."
+        },
+        "confirm": {
+          "name": "Confirm",
+          "description": "Without this the service only reports what it would do."
+        },
+        "purge_entities": {
+          "name": "Purge entities",
+          "description": "Also delete ALL states of entities that only this run used. Entities used by other runs are never purged."
+        }
+      }
+    },
+    "write_test_state": {
+      "name": "Write test state",
+      "description": "Writes exactly one state with the time stamp 2017-06-15 12:00 UTC to sensor.activity_archive_test (label recorder_longterm). Use it to see whether such an old state survives your purges."
+    },
+    "remove_test_state": {
+      "name": "Remove test state",
+      "description": "Removes the test state again by purging only sensor.activity_archive_test, and unregisters that entity."
+    }
+  }
+}

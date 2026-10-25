@@ -1,0 +1,242 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Activity Archive",
+        "description": "Aktivitäten werden mit ihren echten Zeitstempeln in den Home-Assistant-Recorder geschrieben. Wähle den Ordner, in den du Aktivitätsdateien (FIT, GPX, TCX) legst, und wie detailliert die Kurven sein sollen.",
+        "data": {
+          "import_dir": "Importordner",
+          "profile": "Detailgrad"
+        },
+        "data_description": {
+          "import_dir": "Absoluter Pfad unterhalb deines Konfigurationsordners (oder eines erlaubten externen Ordners). Er wird angelegt, falls er fehlt.",
+          "profile": "Genau behält die meisten Punkte und braucht am meisten Datenbankplatz; Standard und Grob dünnen die Kurven aus. Gilt nur für neue Importe."
+        }
+      },
+      "person": {
+        "title": "Erste Person",
+        "description": "Jede Person bekommt eigene Entitäten mit dem Namen sensor.activity_archive_<Kurzname>.",
+        "data": {
+          "name": "Anzeigename",
+          "slug": "Kurzname für Entity-IDs",
+          "athlete_name": "Strava-Athletenname (optional)"
+        },
+        "data_description": {
+          "slug": "Kleinbuchstaben, Ziffern und Unterstriche. Leer lassen, um ihn aus dem Anzeigenamen abzuleiten. Nachträglich nicht änderbar.",
+          "athlete_name": "Dient dazu, Strava-Exportdateien dieser Person zuzuordnen."
+        }
+      }
+    },
+    "error": {
+      "path_not_absolute": "Der Pfad muss absolut sein.",
+      "path_not_allowed": "Der Ordner muss im Konfigurationsordner liegen oder in allowlist_external_dirs stehen.",
+      "name_required": "Gib einen Anzeigenamen ein.",
+      "invalid_slug": "Der Kurzname darf nur Kleinbuchstaben, Ziffern und Unterstriche enthalten (höchstens 24 Zeichen).",
+      "slug_reserved": "Dieser Kurzname kollidiert mit einem Kurvennamen (zum Beispiel heart_rate, speed oder test). Wähle einen anderen.",
+      "slug_exists": "Eine Person mit diesem Kurznamen gibt es schon."
+    },
+    "abort": {
+      "single_instance_allowed": "Activity Archive ist bereits eingerichtet.",
+      "already_configured": "Activity Archive ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Activity Archive",
+        "menu_options": {
+          "settings": "Ordner und Detailgrad",
+          "add_person": "Person hinzufügen",
+          "edit_person": "Person bearbeiten",
+          "remove_person": "Person entfernen"
+        }
+      },
+      "settings": {
+        "title": "Ordner und Detailgrad",
+        "data": {
+          "import_dir": "Importordner",
+          "profile": "Detailgrad"
+        },
+        "data_description": {
+          "profile": "Gilt nur für neue Importe; bereits geschriebene Zustände werden nie verändert."
+        }
+      },
+      "add_person": {
+        "title": "Person hinzufügen",
+        "data": {
+          "name": "Anzeigename",
+          "slug": "Kurzname für Entity-IDs",
+          "athlete_name": "Strava-Athletenname (optional)"
+        },
+        "data_description": {
+          "slug": "Kleinbuchstaben, Ziffern und Unterstriche. Leer lassen, um ihn aus dem Anzeigenamen abzuleiten. Nachträglich nicht änderbar."
+        }
+      },
+      "edit_person": {
+        "title": "Person bearbeiten",
+        "data": {
+          "person": "Person"
+        }
+      },
+      "edit_person_details": {
+        "title": "Person bearbeiten",
+        "description": "Der Kurzname (Entity-IDs) lässt sich nicht ändern.",
+        "data": {
+          "name": "Anzeigename",
+          "athlete_name": "Strava-Athletenname (optional)"
+        }
+      },
+      "remove_person": {
+        "title": "Person entfernen",
+        "description": "Nur die Einstellung wird entfernt. Bereits in den Recorder geschriebene Zustände und die Ledger-Einträge bleiben.",
+        "data": {
+          "person": "Person"
+        }
+      }
+    },
+    "error": {
+      "path_not_absolute": "Der Pfad muss absolut sein.",
+      "path_not_allowed": "Der Ordner muss im Konfigurationsordner liegen oder in allowlist_external_dirs stehen.",
+      "name_required": "Gib einen Anzeigenamen ein.",
+      "invalid_slug": "Der Kurzname darf nur Kleinbuchstaben, Ziffern und Unterstriche enthalten (höchstens 24 Zeichen).",
+      "slug_reserved": "Dieser Kurzname kollidiert mit einem Kurvennamen (zum Beispiel heart_rate, speed oder test). Wähle einen anderen.",
+      "slug_exists": "Eine Person mit diesem Kurznamen gibt es schon.",
+      "last_person": "Mindestens eine Person muss übrig bleiben."
+    }
+  },
+  "selector": {
+    "profile": {
+      "options": {
+        "precise": "Genau (Standard)",
+        "standard": "Standard",
+        "coarse": "Grob"
+      }
+    }
+  },
+  "issues": {
+    "retention_too_short": {
+      "title": "Der Recorder löscht den Verlauf zu früh für das Archiv",
+      "description": "Der Recorder behält nur {keep_days} Tage (purge_keep_days), archivierte Aktivitäten sind aber viel älter. Ohne längere Aufbewahrung löscht der nächste Purge sie. Setze `purge_keep_days` in der Recorder-Konfiguration auf mindestens {needed} oder schalte `auto_purge` aus. Solange diese Meldung besteht, schreibt Activity Archive nichts."
+    },
+    "not_recorded": {
+      "title": "Der Recorder zeichnet die Archiv-Entitäten nicht auf",
+      "description": "{count} Archiv-Entitäten werden vom Recorder-Filter ausgeschlossen (zum Beispiel {entities}). Dafür geschriebene Zustände gingen verloren. Trage das in die Recorder-Konfiguration ein und starte Home Assistant neu:\n\n```yaml\nrecorder:\n  include:\n    entity_globs:\n      - sensor.activity_archive_*\n      - device_tracker.activity_archive_*\n```"
+    },
+    "database_backend": {
+      "title": "Große Importe sind auf {backend} ungetestet",
+      "description": "Activity Archive wurde auf PostgreSQL entworfen und gemessen. Auf {backend} dauert ein vollständiger Import länger und die Datenbankdatei wächst. Sichere vorher und importiere in kleinen Schritten. Das ist nur ein Hinweis."
+    },
+    "low_disk_space": {
+      "title": "Wenig freier Speicherplatz für das Archiv",
+      "description": "Auf dem Konfigurations-Laufwerk sind {free_gb} GB frei. Ein großes Archiv kann die Recorder-Datenbank um 1 bis 2 GB vergrößern, dazu kommen Backups. Schaffe vor einem großen Import mindestens {needed_gb} GB Platz. Das ist nur ein Hinweis."
+    },
+    "recorder_not_recording": {
+      "title": "Der Recorder zeichnet nicht auf",
+      "description": "Der Recorder meldet, dass er die Aufzeichnung beendet hat (zum Beispiel nach voller Warteschlange oder Datenbankfehler). Solange das so ist, schreibt Activity Archive nichts. Prüfe das Home-Assistant-Protokoll und starte Home Assistant neu."
+    },
+    "ledger_unreadable": {
+      "title": "Das Import-Ledger hat ein unbekanntes Format",
+      "description": "Die Datei .storage/activity_archive.ledger hat Version {version}, die diese Version nicht lesen kann. Sie bleibt unangetastet, damit keine Aktivität doppelt importiert wird. Aktualisiere Activity Archive oder stelle die Datei aus einem Backup wieder her."
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "Activity Archive ist nicht eingerichtet oder lädt noch."
+    },
+    "no_person": {
+      "message": "Es ist keine Person eingerichtet. Füge eine in den Optionen der Integration hinzu."
+    },
+    "person_required": {
+      "message": "Es sind mehrere Personen eingerichtet. Gib im Feld Person an, welche gemeint ist."
+    },
+    "person_unknown": {
+      "message": "Diese Person ist nicht eingerichtet."
+    },
+    "run_in_progress": {
+      "message": "Es läuft schon ein Import, Rollback oder Test. Versuche es nach dem Ende erneut."
+    },
+    "import_dir_not_allowed": {
+      "message": "Der Importordner liegt nicht im Konfigurationsordner oder in allowlist_external_dirs."
+    },
+    "import_dir_missing": {
+      "message": "Der Importordner existiert nicht."
+    },
+    "file_outside_import_dir": {
+      "message": "Die Datei muss im Importordner liegen."
+    },
+    "file_not_found": {
+      "message": "Die Datei wurde im Importordner nicht gefunden."
+    },
+    "file_type_not_supported": {
+      "message": "Unterstützt werden nur .fit-, .gpx-, .tcx- und .gz-Dateien."
+    },
+    "file_unreadable": {
+      "message": "Die Datei konnte nicht gelesen werden: {error}"
+    },
+    "ledger_unreadable": {
+      "message": "Das Import-Ledger hat Version {version}, die diese Version nicht lesen kann. Siehe Reparaturen."
+    },
+    "run_unknown": {
+      "message": "Es gibt keinen Lauf mit der ID {run_id}."
+    },
+    "test_write_failed": {
+      "message": "Der Testzustand konnte nicht an den Recorder übergeben werden: {error}"
+    }
+  },
+  "services": {
+    "import_file": {
+      "name": "Datei importieren",
+      "description": "Liest eine FIT-, GPX- oder TCX-Datei aus dem Importordner und schreibt sie in den Recorder. Bei Probelauf an (Standard) wird nur gelesen und gezählt.",
+      "fields": {
+        "file": {
+          "name": "Datei",
+          "description": "Dateiname im Importordner."
+        },
+        "person": {
+          "name": "Person",
+          "description": "Kurzname der Person. Optional, wenn nur eine Person eingerichtet ist."
+        },
+        "dry_run": {
+          "name": "Probelauf",
+          "description": "Nur lesen und zählen, nichts schreiben. Zum Schreiben ausschalten; geschriebene Zustände lassen sich danach nicht mehr ändern."
+        }
+      }
+    },
+    "verify": {
+      "name": "Prüfen",
+      "description": "Prüft das Ledger gegen den Recorder: Sind alle Zustände abgeschlossener Importe noch da?",
+      "fields": {
+        "run_id": {
+          "name": "Lauf",
+          "description": "Nur diesen Lauf prüfen. Leer lassen für alle."
+        }
+      }
+    },
+    "rollback": {
+      "name": "Lauf zurücknehmen",
+      "description": "Nimmt einen Importlauf zurück: Seine Aktivitäten werden als gelöscht markiert und nicht wieder importiert. Die Zustände bleiben im Recorder, außer du löschst zusätzlich Entitäten.",
+      "fields": {
+        "run_id": {
+          "name": "Lauf",
+          "description": "ID des Laufs (siehe Ergebnis von verify oder import_file)."
+        },
+        "confirm": {
+          "name": "Bestätigen",
+          "description": "Ohne das meldet der Dienst nur, was er tun würde."
+        },
+        "purge_entities": {
+          "name": "Entitäten löschen",
+          "description": "Löscht zusätzlich ALLE Zustände von Entitäten, die nur dieser Lauf benutzt hat. Entitäten anderer Läufe werden nie gelöscht."
+        }
+      }
+    },
+    "write_test_state": {
+      "name": "Testzustand schreiben",
+      "description": "Schreibt genau einen Zustand mit dem Zeitstempel 15.06.2017 12:00 UTC auf sensor.activity_archive_test (Label recorder_longterm). So siehst du, ob ein so alter Zustand deine Purges übersteht."
+    },
+    "remove_test_state": {
+      "name": "Testzustand entfernen",
+      "description": "Entfernt den Testzustand wieder, indem nur sensor.activity_archive_test gelöscht und die Entität abgemeldet wird."
+    }
+  }
+}
