@@ -59,11 +59,18 @@ def _info(pair: list[str | None], raw: str) -> SportInfo:
     return SportInfo(sport or "other", sport_type, family, raw)
 
 
-def from_strava(activity_type: str | None) -> SportInfo:
-    """Normalise a Strava ``sport_type`` or CSV ``Activity Type``; unknown becomes ``other``."""
+def from_strava(activity_type: str | None, *, csv: bool = False) -> SportInfo:
+    """Normalise a Strava ``sport_type``; unknown values become ``other``.
+
+    The export CSV only knows the coarse ``Activity Type``: its ``Ride`` may be a road, gravel or
+    mountain bike ride, so with ``csv=True`` a ``Ride`` carries no sport type.
+    """
     raw = (activity_type or "").strip()
     pair = _table()["strava"].get(raw)
-    return _info(pair or ["other", None], raw)
+    info = _info(pair or ["other", None], raw)
+    if csv and raw == "Ride":
+        info = SportInfo(info.sport, None, info.family, raw)
+    return info
 
 
 def from_fit(sport: str | None, sub_sport: str | None) -> SportInfo:
