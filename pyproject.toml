@@ -1,6 +1,6 @@
 [project]
 name = "ha-activity-archive"
-version = "0.1.0"
+version = "0.2.0"
 description = "Home Assistant integration that archives sport activities as recorder states."
 readme = "README.md"
 license = { text = "MIT" }

@@ -1,0 +1,30 @@
+name: Validate
+
+# hassfest checks manifest, translations and services against Home Assistant's rules.
+# The HACS action checks repository metadata (hacs.json, topics, description, issues enabled).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  hassfest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hacs/action@main
+        with:
+          category: integration
+          # No brand images yet (icon.png/logo.png in custom_components/activity_archive/brand).
+          ignore: brands
