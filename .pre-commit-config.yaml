@@ -1,0 +1,16 @@
+# Local hooks (pip install pre-commit; pre-commit install). The repository is public from the
+# first commit, so the privacy guard runs before every commit, not only in CI.
+repos:
+  - repo: local
+    hooks:
+      - id: privacy-guard
+        name: privacy guard
+        entry: python scripts/privacy_guard.py
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: ruff
+        name: ruff check
+        entry: ruff check
+        language: system
+        types: [python]

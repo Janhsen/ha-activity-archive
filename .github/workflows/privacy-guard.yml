@@ -1,0 +1,28 @@
+name: Privacy guard
+
+# Runs on pushes and on pull requests, including forks. Pull requests from forks have no access
+# to secrets, so the optional denylist is simply empty there and only the structural checks run.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Scan files and history
+        env:
+          # Optional GitHub secret: comma or newline separated terms that must never appear
+          # (names, places). It is deliberately not stored in the repository.
+          DENYLIST: ${{ secrets.DENYLIST }}
+        run: python scripts/privacy_guard.py --history
