@@ -37,3 +37,38 @@ PROFILE_PRECISE = "precise"
 PROFILE_STANDARD = "standard"
 PROFILE_COARSE = "coarse"
 DEFAULT_PROFILE = PROFILE_PRECISE
+
+# ---------------------------------------------------------------------------------------------
+# Home Assistant layer (stage E1b)
+# ---------------------------------------------------------------------------------------------
+CONF_IMPORT_DIR = "import_dir"
+CONF_PROFILE = "profile"
+CONF_PEOPLE = "people"
+CONF_PERSON_NAME = "name"
+CONF_PERSON_SLUG = "slug"
+CONF_PERSON_ATHLETE = "athlete_name"
+
+DEFAULT_IMPORT_DIR = "/config/activity_archive/import"
+PROFILES = (PROFILE_PRECISE, PROFILE_STANDARD, PROFILE_COARSE)
+
+# Label that protects entities from the "delete everything without this label" night purge.
+LABEL_LONGTERM = "recorder_longterm"
+
+# E0 test: exactly one state at a fixed time in the past on an entity of its own.
+TEST_OBJECT_ID = "activity_archive_test"
+TEST_ENTITY_ID = f"sensor.{TEST_OBJECT_ID}"
+TEST_TIMESTAMP = 1497528000  # 2017-06-15 12:00:00 UTC
+TEST_STATE = "test"
+
+# Source name in the ledger for a file imported by hand (``activity_archive.import_file``).
+SOURCE_FILE = "file"
+IMPORT_SUFFIXES = (".fit", ".gpx", ".tcx", ".gz")
+
+# Rough free space the start check wants on the volume of the recorder database.
+MIN_FREE_BYTES = 5 * 2**30
+
+LEDGER_STORE_VERSION = 1
+LEDGER_STORE_KEY = f"{DOMAIN}.ledger"
+
+# Padding (seconds) around an activity when ledger and recorder are compared.
+VERIFY_PAD_S = 5

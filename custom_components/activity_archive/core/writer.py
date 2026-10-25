@@ -1,8 +1,8 @@
 """Interface to the recorder writer, plus the backlog brake that works with any implementation.
 
-The real writer (stage E1b) puts hand-built ``state_changed`` events on the recorder queue the way
-``garmin_personal`` does. This module only defines what the importer needs from it so that the
-core stays free of Home Assistant and testable with a fake.
+The real writer (``recorder_writer.RecorderStateWriter``) puts hand-built ``state_changed`` events
+on the recorder queue the way ``garmin_personal`` does. This module only defines what the
+importer needs from it so that the core stays free of Home Assistant and testable with a fake.
 """
 
 from __future__ import annotations

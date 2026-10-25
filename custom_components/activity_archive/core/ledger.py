@@ -9,8 +9,8 @@ An entry has three states: ``writing`` (started, possibly interrupted), ``comple
 states handed to the recorder) and ``tombstone``. Only ``complete`` and ``tombstone`` stop a
 re-import; ``writing`` is resumed and the database tells what is still missing.
 
-Persistence goes through :class:`LedgerStore`. Home Assistant's ``.storage`` implementation is
-added in stage E1b; tests use :class:`MemoryLedgerStore`.
+Persistence goes through :class:`LedgerStore`. Home Assistant's ``.storage`` implementation
+is ``ledger_store.HaLedgerStore``; tests use :class:`MemoryLedgerStore`.
 """
 
 from __future__ import annotations
@@ -199,6 +199,58 @@ class Ledger:
         run["ended"], run["status"] = now, status
         if self.data.get("active_run") == run_id:
             self.data["active_run"] = None
+
+    def rollback_run(self, run_id: str, now: float) -> list[str]:
+        """Tombstone every entry of a finished run so that none of it is imported again.
+
+        Returns the keys that were changed. The states already in the recorder stay: Home
+        Assistant cannot delete a time window. Raises ``KeyError`` for an unknown run and
+        :class:`RunInProgressError` for the active one.
+        """
+        run = self.data["runs"][run_id]
+        if self.active_run(now) == run_id:
+            raise RunInProgressError("the run is still active")
+        changed = [
+            k for k in run["entries"] if self.data["entries"][k]["status"] != STATUS_TOMBSTONE
+        ]
+        for key in changed:
+            self.tombstone(key)
+        run["status"] = "rolled_back"
+        return changed
+
+    def entities_in_use_elsewhere(self, run_id: str) -> set[str]:
+        """Entities that entries outside ``run_id`` (not tombstoned) still count on."""
+        inside = set(self.data["runs"][run_id]["entries"])
+        return {
+            entity
+            for key, entry in self.data["entries"].items()
+            if key not in inside and entry["status"] != STATUS_TOMBSTONE
+            for entity in entry.get("entities", ())
+        }
+
+    def abort_stale_run(self, now: float) -> str | None:
+        """End a run left over from a stopped process; returns its id.
+
+        Call at start-up: no run can be alive in a process that was just started, so the lock
+        must not keep the next run out for hours. The interrupted entry is resumed by the next
+        import (the recorder tells what is missing).
+        """
+        run_id = self.data.get("active_run")
+        if run_id and run_id in self.data["runs"]:
+            self.end_run(run_id, now, "aborted")
+            return run_id
+        self.data["active_run"] = None
+        return None
+
+    def summary(self) -> dict[str, Any]:
+        """Return counts only (no keys, no activity times): safe for diagnostics."""
+        statuses: dict[str, int] = {}
+        for entry in self.data["entries"].values():
+            statuses[entry["status"]] = statuses.get(entry["status"], 0) + 1
+        run_status: dict[str, int] = {}
+        for run in self.data["runs"].values():
+            run_status[run["status"]] = run_status.get(run["status"], 0) + 1
+        return {"version": self.data["v"], "entries": statuses, "runs": run_status}
 
     def run_manifest(self, run_id: str) -> list[dict[str, Any]]:
         """Return what a run wrote: entries with entities and time window (for rollback lists)."""
