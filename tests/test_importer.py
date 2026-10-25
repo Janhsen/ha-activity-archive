@@ -45,7 +45,7 @@ class PlanTest(unittest.TestCase):
     def test_states_carry_unit_and_activity_id_only(self) -> None:
         item = fit_item(2, 8, power=True, cadence=True)
         states = item.plan.entity_states()
-        hr = states["sensor.alex_aktivitaet_puls"]
+        hr = states["sensor.activity_archive_alex_heart_rate"]
         self.assertEqual(
             dict(hr[0].attributes),
             {"unit_of_measurement": "bpm", "activity_id": item.plan.activity_id},
@@ -58,7 +58,7 @@ class PlanTest(unittest.TestCase):
     def test_activity_sensor_uses_start_time_and_session_totals(self) -> None:
         item = fit_item(2, 8)
         plan = item.plan
-        sensor = plan.entity_states()["sensor.alex_aktivitaet"]
+        sensor = plan.entity_states()["sensor.activity_archive_alex"]
         self.assertEqual(len(sensor), 1)
         self.assertEqual(sensor[0].ts, int(g.T0))
         attrs = plan.attributes
@@ -87,11 +87,11 @@ class PlanTest(unittest.TestCase):
         self.assertEqual(plan.attributes["tz_source"], "unknown")
         self.assertNotIn("start_local", plan.attributes)
         entities = set(plan.entity_states())
-        self.assertNotIn("sensor.alex_aktivitaet_geschwindigkeit", entities)
-        self.assertNotIn("sensor.alex_aktivitaet_distanz", entities)
-        self.assertNotIn("sensor.alex_aktivitaet_leistung", entities)
-        self.assertIn("sensor.alex_aktivitaet_puls", entities)
-        self.assertIn("device_tracker.alex_aktivitaet_position", entities)
+        self.assertNotIn("sensor.activity_archive_alex_speed", entities)
+        self.assertNotIn("sensor.activity_archive_alex_distance", entities)
+        self.assertNotIn("sensor.activity_archive_alex_power", entities)
+        self.assertIn("sensor.activity_archive_alex_heart_rate", entities)
+        self.assertIn("device_tracker.activity_archive_alex_position", entities)
 
     def test_sample_activities_per_sport(self) -> None:
         cases = {
@@ -106,7 +106,7 @@ class PlanTest(unittest.TestCase):
         trainer = cases["trainer"].plan
         self.assertIsNone(trainer.gps)
         self.assertTrue(trainer.attributes["trainer"])
-        self.assertNotIn("device_tracker.alex_aktivitaet_position", trainer.entity_states())
+        self.assertNotIn("device_tracker.activity_archive_alex_position", trainer.entity_states())
         self.assertEqual(cases["swim"].plan.sport.sport, "swimming")
 
     def test_running_cadence_is_steps_per_minute(self) -> None:
@@ -128,19 +128,22 @@ class PlanTest(unittest.TestCase):
             SourceActivity(GARMIN_FIT, "2", loader.load_bytes(data)).build_item(person=PERSON).plan
         )
         states = plan.entity_states()
-        for entity in ("sensor.alex_aktivitaet_puls", "device_tracker.alex_aktivitaet_position"):
+        for entity in (
+            "sensor.activity_archive_alex_heart_rate",
+            "device_tracker.activity_archive_alex_position",
+        ):
             marked = [s.ts for s in states[entity] if s.state == "unavailable"]
             self.assertEqual(len(marked), 2, entity)
             self.assertEqual(marked[0], int(samples[299]["t"]) + 1)
             self.assertEqual(marked[-1], int(samples[899]["t"]) + 1)
-        tracker = states["device_tracker.alex_aktivitaet_position"]
+        tracker = states["device_tracker.activity_archive_alex_position"]
         self.assertEqual(tracker[0].state, "not_home")
         self.assertIn("latitude", dict(tracker[0].attributes))
 
     def test_title_and_state_length(self) -> None:
         raw = loader.load_bytes(g.encode_gpx(g.make_track(200), name="x" * 400))
         plan = SourceActivity("strava_file", "7", raw).build_item(person=PERSON).plan
-        state = plan.entity_states()["sensor.alex_aktivitaet"][0].state
+        state = plan.entity_states()["sensor.activity_archive_alex"][0].state
         self.assertEqual(len(state), 255)
         untitled = loader.load_bytes(g.encode_gpx(g.make_track(200), name=""))
         plan = SourceActivity("strava_file", "8", untitled).build_item(person=PERSON).plan
@@ -305,11 +308,11 @@ class ImporterTest(unittest.IsolatedAsyncioTestCase):
         item = fit_item(2, 8)
         await self.run_import(item, ledger, writer)
         order = [entity for entity, _ in writer.write_calls]
-        self.assertEqual(order[-1], "sensor.alex_aktivitaet")
+        self.assertEqual(order[-1], "sensor.activity_archive_alex")
 
     async def test_unrecorded_entity_blocks_everything(self) -> None:
         ledger, writer = await fresh()
-        writer.unrecorded = {"sensor.alex_aktivitaet_hoehe"}
+        writer.unrecorded = {"sensor.activity_archive_alex_altitude"}
         report = await self.run_import(fit_item(2, 8), ledger, writer)
         self.assertEqual(report.outcomes[0].status, importer.BLOCKED)
         self.assertEqual(writer.total(), 0)
@@ -360,7 +363,7 @@ class ImporterTest(unittest.IsolatedAsyncioTestCase):
         report = await self.run_import(item, ledger, writer)
         manifest = ledger.run_manifest(report.run_id)
         self.assertEqual([m["key"] for m in manifest], [item.key])
-        self.assertIn("sensor.alex_aktivitaet", manifest[0]["entities"])
+        self.assertIn("sensor.activity_archive_alex", manifest[0]["entities"])
         self.assertEqual(manifest[0]["start"], item.plan.start)
 
     async def test_stored_states_match_the_plan(self) -> None:

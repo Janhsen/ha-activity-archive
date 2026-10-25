@@ -24,15 +24,16 @@ from ..const import (
 from . import resample, simplify, sports
 from .model import CurveSeries, GpsTrack, RawActivity, StatePoint
 
-# Entity id suffixes (after ``<person>_aktivitaet``) per curve key; the position is a tracker.
+# Entity id suffixes (after ``activity_archive_<person>``) per curve key; the position is a tracker.
+# All ids start with ``activity_archive_`` so that recorder ``entity_globs`` cover them.
 ENTITY_SUFFIX: Final[dict[str, str]] = {
-    "heart_rate": "puls",
-    "altitude": "hoehe",
-    "speed": "geschwindigkeit",
-    "distance": "distanz",
-    "cadence": "kadenz",
-    "power": "leistung",
-    "temperature": "temperatur",
+    "heart_rate": "heart_rate",
+    "altitude": "altitude",
+    "speed": "speed",
+    "distance": "distance",
+    "cadence": "cadence",
+    "power": "power",
+    "temperature": "temperature",
 }
 POSITION_KEY: Final = "position"
 
@@ -46,17 +47,17 @@ class SkippedError(Exception):
 
 def activity_entity(person: str) -> str:
     """Entity id of the activity sensor."""
-    return f"sensor.{person}_aktivitaet"
+    return f"sensor.activity_archive_{person}"
 
 
 def curve_entity(person: str, key: str) -> str:
     """Entity id of a scalar curve sensor."""
-    return f"sensor.{person}_aktivitaet_{ENTITY_SUFFIX[key]}"
+    return f"sensor.activity_archive_{person}_{ENTITY_SUFFIX[key]}"
 
 
 def position_entity(person: str) -> str:
     """Entity id of the position tracker."""
-    return f"device_tracker.{person}_aktivitaet_position"
+    return f"device_tracker.activity_archive_{person}_position"
 
 
 def entity_for(person: str, key: str) -> str:
