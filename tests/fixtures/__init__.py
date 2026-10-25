@@ -1,1 +1,1 @@
-"""Synthetic fixture generators (no real data)."""
+"""Fixture generators; everything here is SYNTHETIC (no real data)."""
