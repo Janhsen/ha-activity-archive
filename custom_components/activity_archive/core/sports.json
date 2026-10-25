@@ -1,0 +1,221 @@
+{
+  "version": 1,
+  "families": {
+    "cycling": "cycling",
+    "running": "running",
+    "walking": "foot",
+    "hiking": "foot",
+    "swimming": "swimming",
+    "strength": "strength",
+    "yoga": "strength",
+    "snowboarding": "snow",
+    "skiing": "snow",
+    "other": "other"
+  },
+  "strava": {
+    "Ride": [
+      "cycling",
+      "road"
+    ],
+    "MountainBikeRide": [
+      "cycling",
+      "mountain"
+    ],
+    "GravelRide": [
+      "cycling",
+      "gravel"
+    ],
+    "EBikeRide": [
+      "cycling",
+      "ebike"
+    ],
+    "EMountainBikeRide": [
+      "cycling",
+      "ebike_mountain"
+    ],
+    "VirtualRide": [
+      "cycling",
+      "indoor"
+    ],
+    "Run": [
+      "running",
+      "road"
+    ],
+    "TrailRun": [
+      "running",
+      "trail"
+    ],
+    "VirtualRun": [
+      "running",
+      "treadmill"
+    ],
+    "Walk": [
+      "walking",
+      null
+    ],
+    "Hike": [
+      "hiking",
+      null
+    ],
+    "Swim": [
+      "swimming",
+      null
+    ],
+    "WeightTraining": [
+      "strength",
+      null
+    ],
+    "Workout": [
+      "strength",
+      null
+    ],
+    "Crossfit": [
+      "strength",
+      null
+    ],
+    "Yoga": [
+      "yoga",
+      null
+    ],
+    "Pilates": [
+      "yoga",
+      null
+    ],
+    "Snowboard": [
+      "snowboarding",
+      null
+    ],
+    "AlpineSki": [
+      "skiing",
+      "alpine"
+    ],
+    "NordicSki": [
+      "skiing",
+      "nordic"
+    ],
+    "BackcountrySki": [
+      "skiing",
+      "backcountry"
+    ]
+  },
+  "fit_sport": {
+    "0": "generic",
+    "1": "running",
+    "2": "cycling",
+    "4": "fitness_equipment",
+    "5": "swimming",
+    "10": "training",
+    "11": "walking",
+    "12": "cross_country_skiing",
+    "13": "alpine_skiing",
+    "14": "snowboarding",
+    "17": "hiking"
+  },
+  "fit_sub_sport": {
+    "0": "generic",
+    "1": "treadmill",
+    "3": "trail",
+    "6": "indoor_cycling",
+    "7": "road",
+    "8": "mountain",
+    "17": "lap_swimming",
+    "18": "open_water",
+    "20": "strength_training",
+    "28": "e_bike_fitness",
+    "43": "yoga",
+    "44": "pilates",
+    "45": "indoor_running",
+    "46": "gravel_cycling",
+    "47": "e_bike_mountain"
+  },
+  "fit": {
+    "running": [
+      "running",
+      "road"
+    ],
+    "running/trail": [
+      "running",
+      "trail"
+    ],
+    "running/treadmill": [
+      "running",
+      "treadmill"
+    ],
+    "running/indoor_running": [
+      "running",
+      "treadmill"
+    ],
+    "cycling": [
+      "cycling",
+      "road"
+    ],
+    "cycling/road": [
+      "cycling",
+      "road"
+    ],
+    "cycling/mountain": [
+      "cycling",
+      "mountain"
+    ],
+    "cycling/gravel_cycling": [
+      "cycling",
+      "gravel"
+    ],
+    "cycling/e_bike_fitness": [
+      "cycling",
+      "ebike"
+    ],
+    "cycling/e_bike_mountain": [
+      "cycling",
+      "ebike_mountain"
+    ],
+    "cycling/indoor_cycling": [
+      "cycling",
+      "indoor"
+    ],
+    "walking": [
+      "walking",
+      null
+    ],
+    "hiking": [
+      "hiking",
+      null
+    ],
+    "swimming": [
+      "swimming",
+      null
+    ],
+    "swimming/lap_swimming": [
+      "swimming",
+      "pool"
+    ],
+    "swimming/open_water": [
+      "swimming",
+      "open_water"
+    ],
+    "training/strength_training": [
+      "strength",
+      null
+    ],
+    "training/yoga": [
+      "yoga",
+      null
+    ],
+    "training/pilates": [
+      "yoga",
+      null
+    ],
+    "snowboarding": [
+      "snowboarding",
+      null
+    ],
+    "alpine_skiing": [
+      "skiing",
+      "alpine"
+    ],
+    "cross_country_skiing": [
+      "skiing",
+      "nordic"
+    ]
+  }
+}
