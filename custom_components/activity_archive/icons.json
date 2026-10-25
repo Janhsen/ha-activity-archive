@@ -1,0 +1,9 @@
+{
+  "services": {
+    "import_file": { "service": "mdi:file-import" },
+    "verify": { "service": "mdi:check-all" },
+    "rollback": { "service": "mdi:undo-variant" },
+    "write_test_state": { "service": "mdi:test-tube" },
+    "remove_test_state": { "service": "mdi:test-tube-off" }
+  }
+}

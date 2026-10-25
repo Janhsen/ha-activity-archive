@@ -1,0 +1,47 @@
+import_file:
+  fields:
+    file:
+      required: true
+      example: "ride.fit"
+      selector:
+        text:
+    person:
+      required: false
+      example: "alex"
+      selector:
+        text:
+    dry_run:
+      required: false
+      default: true
+      selector:
+        boolean:
+
+verify:
+  fields:
+    run_id:
+      required: false
+      example: "1788000000-ab12cd34"
+      selector:
+        text:
+
+rollback:
+  fields:
+    run_id:
+      required: true
+      example: "1788000000-ab12cd34"
+      selector:
+        text:
+    confirm:
+      required: false
+      default: false
+      selector:
+        boolean:
+    purge_entities:
+      required: false
+      default: false
+      selector:
+        boolean:
+
+write_test_state:
+
+remove_test_state:
