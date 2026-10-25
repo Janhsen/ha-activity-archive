@@ -15,7 +15,7 @@
       },
       "person": {
         "title": "First person",
-        "description": "Every person gets their own entities named sensor.activity_archive_<short name>.",
+        "description": "Every person gets their own entities named sensor.activity_archive_ followed by the short name.",
         "data": {
           "name": "Display name",
           "slug": "Short name for entity ids",

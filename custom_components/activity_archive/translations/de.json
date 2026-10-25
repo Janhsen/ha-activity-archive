@@ -15,7 +15,7 @@
       },
       "person": {
         "title": "Erste Person",
-        "description": "Jede Person bekommt eigene Entitäten mit dem Namen sensor.activity_archive_<Kurzname>.",
+        "description": "Jede Person bekommt eigene Entitäten mit dem Namen sensor.activity_archive_ plus Kurzname.",
         "data": {
           "name": "Anzeigename",
           "slug": "Kurzname für Entity-IDs",
