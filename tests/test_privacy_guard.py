@@ -22,7 +22,7 @@ assert _spec.loader is not None
 sys.modules["privacy_guard"] = guard
 _spec.loader.exec_module(guard)
 
-LAT, LON = "48." + "781234", "9." + "170000"  # inside the Germany/Alps box
+LAT, LON = "50." + "123456", "10." + "123456"  # inside the Germany/Alps box
 FAR_LAT, FAR_LON = "0." + "512345", "0." + "498765"  # Gulf of Guinea, synthetic region
 
 
