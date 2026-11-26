@@ -64,3 +64,10 @@ def test_distinct_last_states_keeps_last_occurrence_in_order():
 
     rows = [(1, "a"), (2, "b"), (3, "a"), (4, "unknown"), (5, None), (6, "c"), (7, "b")]
     assert distinct_last_states(rows) == ["a", "c", "b"]
+
+
+def test_last_number_per_day_only_ascii_numbers():
+    from custom_components.activity_archive.core.daystats import last_number_per_day
+
+    rows = [(1.0, "٣"), (2.0, "\x1c7"), (3.0, " 12"), (4.0, "1e"), (5.0, "Infinity")]
+    assert last_number_per_day(rows, lambda t: str(int(t))) == {"3": 12.0, "4": 1.0}

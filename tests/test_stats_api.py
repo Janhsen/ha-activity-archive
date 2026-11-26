@@ -118,3 +118,39 @@ def test_day_states_rejects_foreign_ids(monkeypatch):
         "times": [],
     }
     assert run_states(msg, {}, monkeypatch).error
+
+
+def test_distinct_attributes_answers_reader_result(monkeypatch):
+    sets = {"sensor.a": [{"f": 1.0, "l": 2.0, "a": {"k": 1}}]}
+    monkeypatch.setattr(stats_api, "read_attribute_sets", lambda hass, ids, a, b: sets)
+    hass = ha_stubs.FakeHass("/tmp")
+    conn = Conn()
+    msg = {
+        "id": 1,
+        "type": "activity_archive/distinct_attributes",
+        "start_time": "2026-10-19T00:00:00Z",
+        "end_time": "2026-10-23T00:00:00Z",
+        "entity_ids": ["sensor.a"],
+    }
+    asyncio.run(stats_api.ws_distinct_attributes(hass, conn, msg))
+    assert conn.result == sets
+    conn = Conn()
+    asyncio.run(stats_api.ws_distinct_attributes(hass, conn, {**msg, "entity_ids": ["sensor.a\n"]}))
+    assert conn.error
+    conn = Conn()
+    many = [f"sensor.x{i}" for i in range(21)]
+    asyncio.run(stats_api.ws_distinct_attributes(hass, conn, {**msg, "entity_ids": many}))
+    assert conn.error
+
+
+def test_times_without_zone_do_not_raise(monkeypatch):
+    msg = {
+        **BASE,
+        "start_time": "2026-10-19T00:00:00",
+        "end_time": "2026-10-23T00:00:00Z",
+        "last": ["sensor.a"],
+        "mean": [],
+    }
+    conn = run(msg, {"sensor.a": []}, monkeypatch)
+    assert conn.error is None and conn.result == {"last": {"sensor.a": {}}, "mean": {}}
+    assert run({**msg, "start_time": "nonsense"}, {}, monkeypatch).error

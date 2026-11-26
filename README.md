@@ -79,6 +79,28 @@ per-day view needs, instead of sending every state change as the history API doe
 * The state valid at `start_time` is included, as in the history API. Only `sensor.` ids are
   accepted; the answer is `{"last": {id: {"2026-10-20": 71.0}}, "times": {id: ["..."]}}`.
 
+## WebSocket command `activity_archive/distinct_attributes`
+
+Returns each distinct attribute set an entity had in a time window once, instead of one copy
+per recorded state as the history API does. Useful when an entity carries a large attribute
+payload that repeats over many state rows.
+
+```json
+{"type": "activity_archive/distinct_attributes",
+ "start_time": "2026-10-01T00:00:00Z", "end_time": "2026-11-01T00:00:00Z",
+ "entity_ids": ["sensor.example_last_activity"]}
+```
+
+* The answer is `{entity_id: [{"f": first, "l": last, "a": {...}}, ...]}`: the attributes with
+  the first and last time (unix seconds) the set was seen, sorted by first time.
+* The set valid at `start_time` is included (with `f` = start), as in the history API.
+* At most 20 `sensor.` ids. Nothing is merged, shortened or calculated.
+
+All three commands answer every logged-in user (like the history and statistics commands of
+Home Assistant), run at most two reads at a time, and read times without a zone in the Home
+Assistant time zone. `scripts/real_recorder_check.py` runs their SQL against the real recorder
+schema (needs an environment with Home Assistant installed).
+
 ## Privacy
 
 * Activity data lives in the recorder database of your Home Assistant.

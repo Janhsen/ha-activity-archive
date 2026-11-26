@@ -50,7 +50,8 @@ def mean_per_day(rows: Iterable[Row], day_of: Callable[[float], str]) -> dict[st
 # One recorded state: (time as unix seconds, state text or None).
 StateRow = tuple[float, str | None]
 
-_NUMBER = re.compile(r"^\s*[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?")
+# ASCII digits and ASCII white space only, so that every match is a text float() accepts.
+_NUMBER = re.compile(r"[ \t\n\r\f\v]*([+-]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?)")
 _NO_VALUE = {"", "unknown", "unavailable"}
 
 
@@ -68,7 +69,7 @@ def last_number_per_day(
         found = _NUMBER.match(state)
         if found is None:
             continue
-        value = float(found.group(0))
+        value = float(found.group(1))
         if math.isfinite(value):
             out[day_of(when)] = value
     return out
