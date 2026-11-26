@@ -359,6 +359,7 @@ class FakeHass:
     def __init__(self, config_dir: str):
         self.config = FakeConfig(config_dir)
         self.recorder = FakeRecorder()
+        self.ws_commands: list = []
         self.entity_registry = FakeEntityRegistry()
         self.label_registry = FakeLabelRegistry()
         self.issues: dict[tuple[str, str], dict] = {}
@@ -453,6 +454,15 @@ def install() -> bool:
     )
     rec.__path__ = []
     components.recorder = rec
+    ws_api = _module(
+        "homeassistant.components.websocket_api",
+        BASE_COMMAND_MESSAGE_SCHEMA=types.SimpleNamespace(extend=lambda d: Schema(d)),
+        websocket_command=lambda schema: lambda f: f,
+        async_response=lambda f: f,
+        async_register_command=lambda hass, handler: hass.ws_commands.append(handler),
+        ActiveConnection=object,
+    )
+    components.websocket_api = ws_api
     helpers = _module("homeassistant.helpers")
     helpers.__path__ = []
     registries = {
@@ -490,6 +500,7 @@ def install() -> bool:
     dtmod = _module(
         "homeassistant.util.dt",
         utc_from_timestamp=lambda ts: datetime.fromtimestamp(ts, UTC),
+        parse_datetime=lambda s: datetime.fromisoformat(s.replace("Z", "+00:00")),
         get_default_time_zone=lambda: UTC,
     )
     util.dt = dtmod

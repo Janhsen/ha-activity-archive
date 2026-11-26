@@ -18,6 +18,7 @@ from homeassistant.helpers.typing import ConfigType
 from .const import DOMAIN
 from .manager import ArchiveManager
 from .services import async_register_services
+from .stats_api import async_register_ws
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,8 +28,9 @@ type ArchiveConfigEntry = ConfigEntry[ArchiveManager]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Register the services once for the whole integration."""
+    """Register the services and the WebSocket command once for the whole integration."""
     async_register_services(hass)
+    async_register_ws(hass)
     return True
 
 

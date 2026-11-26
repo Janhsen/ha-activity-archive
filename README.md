@@ -40,6 +40,27 @@ owners.
 2. Title, description and sport come from Strava when available.
 3. Duplicates are only searched within one person.
 
+## WebSocket command `activity_archive/day_stats`
+
+Returns hourly statistics reduced to one value per local day, read straight from the
+recorder tables (read only). A dashboard card that shows one value per day then receives about
+one row per day instead of 24, which is much smaller than `recorder/statistics_during_period`
+with `period: hour`.
+
+```json
+{"type": "activity_archive/day_stats",
+ "start_time": "2026-10-01T00:00:00Z", "end_time": "2026-11-01T00:00:00Z",
+ "last": ["sensor.example_sleep_score"], "mean": ["sensor.example_body_battery"]}
+```
+
+* `last`: the last hourly value of the day that has one (the hourly mean, or the state when
+  there is no mean).
+* `mean`: the mean of the hourly means of the day.
+* The answer is `{"last": {id: {"2026-10-20": 71.0}}, "mean": {...}}`. Days without a usable
+  row are absent; nothing is interpolated.
+* Any logged-in user may call it (like the recorder command it replaces); only `sensor.`
+  statistic ids are accepted.
+
 ## Privacy
 
 * Activity data lives in the recorder database of your Home Assistant.
