@@ -61,6 +61,24 @@ with `period: hour`.
 * Any logged-in user may call it (like the recorder command it replaces); only `sensor.`
   statistic ids are accepted.
 
+## WebSocket command `activity_archive/day_states`
+
+Reduces the recorded states of an entity (the `states` table, not the statistics) to what a
+per-day view needs, instead of sending every state change as the history API does.
+
+```json
+{"type": "activity_archive/day_states",
+ "start_time": "2026-10-01T00:00:00Z", "end_time": "2026-11-01T00:00:00Z",
+ "last": ["sensor.example_readiness"], "times": ["sensor.example_wake_time"]}
+```
+
+* `last`: the last numeric state of each local day (by update time).
+* `times`: for entities whose state is a time stamp, each distinct state once, in the order of
+  its last occurrence. A value always falls on the same day, so the result of a "last value per
+  derived day" reading stays the same.
+* The state valid at `start_time` is included, as in the history API. Only `sensor.` ids are
+  accepted; the answer is `{"last": {id: {"2026-10-20": 71.0}}, "times": {id: ["..."]}}`.
+
 ## Privacy
 
 * Activity data lives in the recorder database of your Home Assistant.

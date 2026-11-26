@@ -49,3 +49,18 @@ def test_local_day_boundary_follows_the_time_zone_across_dst():
     # 25.10.2026 has 25 hours (end of summer time): 23:00 local still belongs to that day.
     rows = [(hour("2026-10-25", 23), 5.0, None), (hour("2026-10-26", 0), 6.0, None)]
     assert last_per_day(rows, day_of) == {"2026-10-25": 5.0, "2026-10-26": 6.0}
+
+
+def test_last_number_per_day_reads_leading_number_and_skips_text():
+    from custom_components.activity_archive.core.daystats import last_number_per_day
+
+    rows = [(1.0, "5"), (2.0, "unavailable"), (3.0, "7.5 kg"), (90000.0, "x"), (90001.0, "-2")]
+    day = lambda t: "d1" if t < 86400 else "d2"  # noqa: E731
+    assert last_number_per_day(rows, day) == {"d1": 7.5, "d2": -2.0}
+
+
+def test_distinct_last_states_keeps_last_occurrence_in_order():
+    from custom_components.activity_archive.core.daystats import distinct_last_states
+
+    rows = [(1, "a"), (2, "b"), (3, "a"), (4, "unknown"), (5, None), (6, "c"), (7, "b")]
+    assert distinct_last_states(rows) == ["a", "c", "b"]

@@ -75,3 +75,46 @@ def test_empty_request_answers_empty(monkeypatch):
         "mean": [],
     }
     assert run(msg, {}, monkeypatch).result == {"last": {}, "mean": {}}
+
+
+def run_states(msg, rows, monkeypatch):
+    monkeypatch.setattr(stats_api, "read_states", lambda hass, ids, a, b: rows)
+    hass = ha_stubs.FakeHass("/tmp")
+    conn = Conn()
+    asyncio.run(stats_api.ws_day_states(hass, conn, msg))
+    return conn
+
+
+def test_day_states_reduces_states(monkeypatch):
+    rows = {
+        "sensor.a": [(ts(20, 3), "1"), (ts(20, 9), "3"), (ts(21, 4), "unknown")],
+        "sensor.b": [
+            (ts(20, 3), "2026-10-20T04:00:00+00:00"),
+            (ts(21, 3), "2026-10-21T04:00:00+00:00"),
+        ],
+    }
+    msg = {
+        "id": 1,
+        "type": "activity_archive/day_states",
+        "start_time": "2026-10-19T00:00:00Z",
+        "end_time": "2026-10-23T00:00:00Z",
+        "last": ["sensor.a"],
+        "times": ["sensor.b"],
+    }
+    conn = run_states(msg, rows, monkeypatch)
+    assert conn.result == {
+        "last": {"sensor.a": {"2026-10-20": 3.0}},
+        "times": {"sensor.b": ["2026-10-20T04:00:00+00:00", "2026-10-21T04:00:00+00:00"]},
+    }
+
+
+def test_day_states_rejects_foreign_ids(monkeypatch):
+    msg = {
+        "id": 1,
+        "type": "activity_archive/day_states",
+        "start_time": "2026-10-19T00:00:00Z",
+        "end_time": "2026-10-20T00:00:00Z",
+        "last": ["person.x"],
+        "times": [],
+    }
+    assert run_states(msg, {}, monkeypatch).error
