@@ -138,14 +138,13 @@ class _Marker:
     def __init__(self, schema, default=None):
         self.schema, self.default = schema, default
 
+    # Like voluptuous: a marker hashes and compares as the key it wraps, so
+    # ``{Required("type"): x}["type"]`` works.
     def __hash__(self):
-        return hash((type(self).__name__, self.schema))
+        return hash(self.schema)
 
     def __eq__(self, other):
-        return isinstance(other, _Marker) and (type(self), self.schema) == (
-            type(other),
-            other.schema,
-        )
+        return self.schema == getattr(other, "schema", other)
 
 
 class Required(_Marker):
@@ -373,6 +372,15 @@ class FakeHass:
 
 
 # ----------------------------------------------------------------------------- installation
+def _ws_command(schema):
+    """Like HA: a dict, or a validator object whose first validator is the message schema."""
+    if isinstance(schema, dict):
+        schema["type"]
+    else:
+        schema.validators[0].schema["type"]
+    return lambda f: f
+
+
 def _module(name: str, **attrs) -> types.ModuleType:
     mod = types.ModuleType(name)
     mod.__dict__.update(attrs)
@@ -457,7 +465,7 @@ def install() -> bool:
     ws_api = _module(
         "homeassistant.components.websocket_api",
         BASE_COMMAND_MESSAGE_SCHEMA=types.SimpleNamespace(extend=lambda d: Schema(d)),
-        websocket_command=lambda schema: lambda f: f,
+        websocket_command=_ws_command,
         async_response=lambda f: f,
         async_register_command=lambda hass, handler: hass.ws_commands.append(handler),
         ActiveConnection=object,

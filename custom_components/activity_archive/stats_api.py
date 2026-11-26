@@ -28,15 +28,14 @@ MAX_IDS = 200
 MAX_SPAN_DAYS = 800
 
 _ID_RE = re.compile(r"^sensor\.[a-z0-9_]+$")
-SCHEMA = websocket_api.BASE_COMMAND_MESSAGE_SCHEMA.extend(
-    {
-        vol.Required("type"): WS_TYPE,
-        vol.Required("start_time"): cv.string,
-        vol.Required("end_time"): cv.string,
-        vol.Optional("last", default=[]): [cv.string],
-        vol.Optional("mean", default=[]): [cv.string],
-    }
-)
+# A plain dict: the decorator reads the command name from it and adds the base message schema.
+SCHEMA = {
+    vol.Required("type"): WS_TYPE,
+    vol.Required("start_time"): cv.string,
+    vol.Required("end_time"): cv.string,
+    vol.Optional("last", default=[]): [cv.string],
+    vol.Optional("mean", default=[]): [cv.string],
+}
 
 
 def _day_of_factory(tz: Any) -> Callable[[float], str]:
